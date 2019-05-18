@@ -20,23 +20,23 @@ var routes = Routes{
 	},
 	Route{
 		"GET",
-		"/dataset",
-		GetDatasets,
+		"/device",
+		GetDevices,
 	},
 	Route{
 		"GET",
-		"/dataset/:id",
-		GetDatasetId,
+		"/device/:id",
+		GetDeviceId,
 	},
 	Route{
 		"POST",
-		"/dataset",
-		PostDataset,
+		"/device",
+		PostDevice,
 	},
 	Route{
 		"DELETE",
-		"/dataset/:id",
-		DeleteDatasetId,
+		"/device/:id",
+		DeleteDeviceId,
 	},
 }
 

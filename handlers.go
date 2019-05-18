@@ -11,26 +11,26 @@ import (
 	mux "github.com/julienschmidt/httprouter"
 )
 
-const dbDataName = "IoT_Datasets"
+const dbDataName = "Devices"
 
 func Index(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 	fmt.Fprintf(w, "<h1 style=\"font-family: Helvetica;\">Hello, welcome to IoT REST web service</h1>")
 }
 
-func GetDatasets(w http.ResponseWriter, r *http.Request, _ mux.Params) {
+func GetDevices(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
 	records, err := IoTDB.ReadAll(dbDataName)
 	HandleError(err)
-	entries := []IoTDataset{}
+	entries := []Device{}
 	for _, e := range records {
-		dataset := IoTDataset{}
-		if err := json.Unmarshal([]byte(e), &dataset); err != nil {
+		device := Device{}
+		if err := json.Unmarshal([]byte(e), &device); err != nil {
 			fmt.Println("Error", err)
 		} else {
-			entries = append(entries, dataset)
+			entries = append(entries, device)
 		}
 	}
 
@@ -39,51 +39,57 @@ func GetDatasets(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 	}
 }
 
-func GetDatasetId(w http.ResponseWriter, r *http.Request, ps mux.Params) {
+func GetDeviceId(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 	id, err := strconv.Atoi(ps.ByName("id"))
 	HandleError(err)
 
-	var dataset IoTDataset
-	err = IoTDB.Read(dbDataName, strconv.Itoa(id), &dataset)
+	var device Device
+	err = IoTDB.Read(dbDataName, strconv.Itoa(id), &device)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 	} else {
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(dataset); err != nil {
+		if err := json.NewEncoder(w).Encode(device); err != nil {
 			panic(err)
 		}
 	}
 }
 
-func PostDataset(w http.ResponseWriter, r *http.Request, _ mux.Params) {
+func PostDevice(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 	// Read request body and close it
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	HandleError(err)
 	defer r.Body.Close()
 
-	// Save JSON to Post struct
-	var dataset IoTDataset
-	if err := json.Unmarshal(body, &dataset); err != nil {
+	// Convert JSON to Post struct
+	var device Device
+	if err := json.Unmarshal(body, &device); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err = IoTDB.Write(dbDataName, strconv.Itoa(dataset.ID), dataset)
+	// verify ID length
+	if len(device.ID) > 50 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = IoTDB.Write(dbDataName, device.ID, device)
 	HandleError(err)
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(dataset); err != nil {
+	if err := json.NewEncoder(w).Encode(device); err != nil {
 		panic(err)
 	}
 
-	//IoTDB.Read(dbDataName, strconv.Itoa(dataset.ID), &dataset)
-	//fmt.Println("New Dataset: ", dataset)
+	//IoTDB.Read(dbDataName, strconv.Itoa(device.ID), &device)
+	//fmt.Println("New Device: ", device)
 }
 
-func DeleteDatasetId(w http.ResponseWriter, r *http.Request, ps mux.Params) {
+func DeleteDeviceId(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 	id, err := strconv.Atoi(ps.ByName("id"))
 	HandleError(err)
 
