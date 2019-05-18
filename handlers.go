@@ -66,9 +66,8 @@ func PostDataset(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 	// Save JSON to Post struct
 	var dataset IoTDataset
 	if err := json.Unmarshal(body, &dataset); err != nil {
-		if err := json.NewEncoder(w).Encode(err); err != nil {
-			panic(err)
-		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	err = IoTDB.Write(dbDataName, strconv.Itoa(dataset.ID), dataset)
@@ -80,7 +79,7 @@ func PostDataset(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 		panic(err)
 	}
 
-	IoTDB.Read(dbDataName, strconv.Itoa(dataset.ID), &dataset)
+	//IoTDB.Read(dbDataName, strconv.Itoa(dataset.ID), &dataset)
 	//fmt.Println("New Dataset: ", dataset)
 }
 
