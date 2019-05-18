@@ -33,6 +33,11 @@ var routes = Routes{
 		"/dataset",
 		PostDataset,
 	},
+	Route{
+		"DELETE",
+		"/dataset/:id",
+		DeleteDatasetId,
+	},
 }
 
 func NewRouter() *mux.Router {
